@@ -1,0 +1,7 @@
+﻿body {
+}
+
+tr.book-row:hover {
+	cursor: pointer;
+	background-color: aliceblue;
+}

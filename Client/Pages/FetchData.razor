@@ -1,0 +1,47 @@
+﻿@page "/fetchdata"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using EsseEuJaLi.Shared
+@attribute [Authorize]
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<PageTitle>Lista de Livros</PageTitle>
+
+@if (books == null) {
+    <p><em>Carregando...</em></p>
+} else {
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Titulo</th>
+                <th>Autor</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var book in books) {
+                <tr class="book-row" @onclick="() => RedirectToBook(book.Id)">
+                    <td>@book.Title</td>
+                    <td>@book.Author</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private BookDto[]? books;
+    private void RedirectToBook(string id)
+    {
+        Navigation.NavigateTo($"book/{id}");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try {
+            books = await Http.GetFromJsonAsync<BookDto[]>("Books/Get");
+        } catch (AccessTokenNotAvailableException exception) {
+            exception.Redirect();
+        }
+    }
+}

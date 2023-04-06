@@ -1,0 +1,40 @@
+﻿@page "/book/{id}"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using EsseEuJaLi.Shared
+@inject HttpClient Http
+
+<PageTitle>Livro</PageTitle>
+
+@if(Book is not null) {
+    <h1>@Book.Title - @Book.Author</h1>
+    <h2>@Book.Genre</h2>
+    <p>Número de páginas: @Book.Pages</p>
+    <button class="btn btn-primary" @onclick="MarkAsRead" disabled=@Read>Lido</button>
+} else {
+    <h1>Carregando</h1>
+}
+
+
+@code {
+    [Parameter]
+    public string? Id { get; set; }
+    private BookDto? Book { get; set; }
+    private bool Read { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try {
+            Read = await Http.GetFromJsonAsync<bool>($"books/wasread?id={Id!}");
+            Book = await Http.GetFromJsonAsync<BookDto>($"books/getsingle?id={Id!}");
+        } catch (AccessTokenNotAvailableException exception) {
+            exception.Redirect();
+        }
+    }
+
+    private async void MarkAsRead()
+    {
+        Read = await Http.GetFromJsonAsync<bool>($"books/markasread?id={Id!}");
+        StateHasChanged();
+    }
+}

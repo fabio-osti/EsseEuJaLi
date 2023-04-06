@@ -1,0 +1,31 @@
+﻿@page "/counter"
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
+@inject HttpClient Http
+
+<PageTitle>Meu Perfil</PageTitle>
+
+<h1 role="status">Pontuação total: @points</h1>
+@if (trophies is not null) {
+    <hr>
+    <h2>🏆 Troféus 🏆</h2>
+    @foreach (var trophie in trophies) {
+        <li style="font-size: 18px;">@trophie</li>
+    }
+}
+
+
+
+@code {
+    private int points = 0;
+    private string[]? trophies;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try {
+            points = await Http.GetFromJsonAsync<int>("Books/GetPoints");
+            trophies = await Http.GetFromJsonAsync<string[]>("Books/GetTrophies");
+        } catch (AccessTokenNotAvailableException exception) {
+            exception.Redirect();
+        }
+    }
+}
